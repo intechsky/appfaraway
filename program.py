@@ -667,6 +667,27 @@ class WinUSB:
                 print("")
                 self.u.grab("Press [enter] to return...")
                 return
+
+         print("Gathering DUET boot files...")
+        uefi_only = False
+        duet_loc = os.path.join(temp,"Utilities","LegacyBoot")
+        for x in (self.oc_boot,self.oc_boot_alt,self.oc_boot0,self.oc_boot1):
+            # Check the local dir first
+            if os.path.exists(os.path.join(duet_loc,x)):
+                print(" - {}".format(x))
+                # Copy it over
+                target_name = self.oc_boot if x == self.oc_boot_alt else x
+                shutil.copy(os.path.join(duet_loc,x), os.path.join(temp,target_name))
+        missing_list = [x for x in (self.oc_boot,self.oc_boot0,self.oc_boot1) if not os.path.exists(os.path.join(temp,x))]
+        if missing_list:
+            print(" - Missing: {}".format(", ".join(missing_list)))
+            print("Attempting to download...")
+            for x in missing_list:
+                print(" - {}".format(x))
+                self.dl.stream_to_file(self.oc_boot_url + x, os.path.join(temp,x),False)
+            if not all((os.path.exists(os.path.join(temp,x)) for x in missing_list)):
+                print("Could not located all required DUET files - USB will be UEFI ONLY")
+                uefi_only = True
         # Should result in a .iso file
         clover_iso = next((x for x in os.listdir(temp) if x.lower().endswith(".iso")),None)
         if not clover_iso:
