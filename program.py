@@ -583,23 +583,7 @@ class WinUSB:
                 "/keep_dpt",
                 "/quiet"
             ]
-            out = self.r.run({"args":args})
-            if out[2] != 0:
-                shutil.rmtree(temp,ignore_errors=True)
-                print(" - An error occurred updating the MBR: {}".format(out[2]))
-                print("")
-                self.u.grab("Press [enter] to return...")
-                return
-            print("Updating the PBR with {}...".format(self.oc_boot1))
-            args = [
-                os.path.join(self.s_path,self.bi_name),
-                "/device={}:0".format(disk.get("index",-1)),
-                "/pbr",
-                "/restore",
-                "/file={}".format(os.path.join(temp,self.oc_boot1)),
-                "/keep_bpb",
-                "/quiet"
-            ]
+
             out = self.r.run({"args":args})
             if out[2] != 0:
                 shutil.rmtree(temp,ignore_errors=True)
