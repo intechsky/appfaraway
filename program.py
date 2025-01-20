@@ -119,6 +119,37 @@ class WinUSB:
         print("")
         print("{} >= {}, continuing...".format(plat, self.min_plat))
 
+    def verify_os(self):
+        self.u.head("Verifying OS")
+        print("")
+        print("Verifying OS name...")
+        if not os.name=="nt":
+            print("")
+            print("This script is only for Windows!")
+            print("")
+            self.u.grab("Press [enter] to exit...")
+            exit(1)
+        print(" - Name = NT")
+        print("Verifying OS version...")
+        # Verify we're at version 9600 or greater
+        try:
+            # Set plat to the last item of the output split by . - looks like:
+            # Windows-8.1-6.3.9600
+            # or this:
+            # Windows-10-10.0.17134-SP0
+            plat = int(platform.platform().split(".")[-1].split("-")[0])
+        except:
+            plat = 0
+        if plat < self.min_plat:
+            print("")
+            print("Currently running {}, this script requires version {} or newer.".format(platform.platform(), self.min_plat))
+            print("")
+            self.u.grab("Press [enter] to exit...")
+            exit(1)
+        print(" - Version = {}".format(plat))
+        print("")
+        print("{} >= {}, continuing...".format(plat, self.min_plat))
+
     def get_disks_of_type(self, disk_list, disk_type=(0,2)):
         disks = {}
         for disk in disk_list:
