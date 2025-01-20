@@ -255,6 +255,37 @@ class WinUSB:
         if not json_data: print(" --> Not found!")
         else: return self.get_dl_url_from_json(json_data,suffix="-RELEASE.zip")
 
+    def verify_os(self):
+        self.u.head("Verifying OS")
+        print("")
+        print("Verifying OS name...")
+        if not os.name=="nt":
+            print("")
+            print("This script is only for Windows!")
+            print("")
+            self.u.grab("Press [enter] to exit...")
+            exit(1)
+        print(" - Name = NT")
+        print("Verifying OS version...")
+        # Verify we're at version 9600 or greater
+        try:
+            # Set plat to the last item of the output split by . - looks like:
+            # Windows-8.1-6.3.9600
+            # or this:
+            # Windows-10-10.0.17134-SP0
+            plat = int(platform.platform().split(".")[-1].split("-")[0])
+        except:
+            plat = 0
+        if plat < self.min_plat:
+            print("")
+            print("Currently running {}, this script requires version {} or newer.".format(platform.platform(), self.min_plat))
+            print("")
+            self.u.grab("Press [enter] to exit...")
+            exit(1)
+        print(" - Version = {}".format(plat))
+        print("")
+        print("{} >= {}, continuing...".format(plat, self.min_plat))
+
     def diskpart_flag(self, disk, as_efi=False):
         # Sets and unsets the GUID needed for a GPT EFI partition ID
         self.u.head("Changing ID With DiskPart")
