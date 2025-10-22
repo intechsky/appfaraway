@@ -229,29 +229,7 @@ class WinUSB:
         self.z_path = self.z_path64 if os.path.exists(self.z_path64) else self.z_path32 if os.path.exists(self.z_path32) else None
         return self.z_path and os.path.exists(self.z_path)
 
-    def check_bi(self):
-        # Checks for BOOTICEx64.exe in our scripts dir
-        # and downloads it if need be
-        if os.path.exists(os.path.join(self.s_path, self.bi_name)):
-            # print("Located {}!".format(self.bi_name))
-            # Got it
-            return True
-        print("Couldn't locate {} - downloading...".format(self.bi_name))
-        self.dl.stream_to_file(self.bi_url, os.path.join(self.s_path, self.bi_name))
-        print("")
-        return os.path.exists(os.path.join(self.s_path,self.bi_name))
-
-    def get_dl_url_from_json(self,json_data,suffix=(".lzma",".iso.7z")):
-        try: j_list = json.loads(json_data)
-        except: return None
-        j_list = j_list if isinstance(j_list,list) else [j_list]
-        for j in j_list:
-            dl_link = next((x.get("browser_download_url", None) for x in j.get("assets", []) if x.get("browser_download_url", "").endswith(suffix)), None)
-            if dl_link: break
-        if not dl_link:
-            return None
-        return { "url" : dl_link, "name" : os.path.basename(dl_link), "info" : j.get("body", None) }
-
+    
     def get_dl_info(self,clover_version=None):
         # Returns the latest download package and info in a
         # dictionary:  { "url" : dl_url, "name" : name, "info" : update_info }
@@ -520,6 +498,8 @@ class WinUSB:
         else:
             self.dd_image(disk, os.path.join(temp, hfs), clover_version, local_file=local_file)
         shutil.rmtree(temp,ignore_errors=True)
+
+    
 
     def dd_image(self, disk, image, clover_version = None, local_file = None):
         # Let's dd the shit out of our disk
