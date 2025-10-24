@@ -46,16 +46,22 @@ class WinUSB:
             "recoveryhdmetadmg.pkg",
             "basesystem.dmg",
             "recoveryimage.dmg"
-        )
-        self.dd_bootsector = True
-        self.boot0 = "boot0af"
-        self.boot1 = "boot1f32alt"
-        self.boot  = "boot6"
-        self.efi_id = "c12a7328-f81f-11d2-ba4b-00a0c93ec93b" # EFI
-        self.bas_id = "ebd0a0a2-b9e5-4433-87c0-68b6b72699c7" # Microsoft Basic Data
-        self.hfs_id = "48465300-0000-11AA-AA11-00306543ECAC" # HFS+
-        self.rec_id = "426F6F74-0000-11AA-AA11-00306543ECAC" # Apple Boot partition (Recovery HD)
-        self.show_all_disks = False
+        import random
+
+number = random.randint(1, 50)
+attempts = 0
+
+while True:
+    guess = int(input("Guess a number between 1 and 50: "))
+    attempts += 1
+    if guess == number:
+        print(f"🎉 Correct! You guessed it in {attempts} tries.")
+        break
+    elif guess < number:
+        print("Too low! Try again.")
+    else:
+        print("Too high! Try again.")
+
     
     def verify_os(self):
         self.u.head("Verifying OS")
@@ -1017,69 +1023,14 @@ class WinUSB:
                 if not l_check or not l_check.lower().endswith(".zip" if use_oc else (".tar.lzma",".7z")):
                     continue
                 # Got a valid path that ends with the proper extension
-                local_file = l_check
-                break
-            # Check if we got something
-            if not local_file:
-                self.main()
-                return
-        if only_boot:
-            if use_oc: self.install_oc(selected_disk, local_file=local_file)
-            else: self.install_clover(selected_disk, clover_version, local_file=local_file)
-        elif no_format:
-            # Make sure we warn the user that the second partition **NEEDS** to be a RAW
-            # partition for dd to properly work
-            while True:
-                self.u.head("WARNING")
-                print("")
-                print("{}. {} - {} ({})".format(
-                    selected_disk.get("index",-1), 
-                    selected_disk.get("model","Unknown"), 
-                    self.dl.get_size(selected_disk.get("size",-1),strip_zeroes=True),
-                    ["Unknown","No Root Dir","Removable","Local","Network","Disc","RAM Disk"][selected_disk.get("type",0)]
-                    ))
-                print("")
-                print("In order to continue without formatting, the selected disk's first")
-                print("partition MUST be FAT32, and the second MUST be RAW.  If that is not")
-                print("the case, the operation WILL fail.")
-                print("")
-                yn = self.u.grab("Continue? (y/n):  ")
-                if yn.lower() == "n":
-                    self.main()
-                    return
-                if yn.lower() == "y":
-                    break
-            self.select_package(selected_disk, clover_version, local_file=local_file)
-        elif set_efi:
-            self.diskpart_flag(selected_disk, True)
-        elif unset_efi:
-            self.diskpart_flag(selected_disk, False)
-        else:
-            # Check erase
-            while True:
-                self.u.head("Erase {}".format(selected_disk.get("model","Unknown")))
-                print("")
-                print("{}. {} - {} ({})".format(
-                    selected_disk.get("index",-1), 
-                    selected_disk.get("model","Unknown"), 
-                    self.dl.get_size(selected_disk.get("size",-1),strip_zeroes=True),
-                    ["Unknown","No Root Dir","Removable","Local","Network","Disc","RAM Disk"][selected_disk.get("type",0)]
-                    ))
-                print("")
-                print("If you continue - THIS DISK WILL BE ERASED")
-                print("ALL DATA WILL BE LOST AND ALL PARTITIONS WILL")
-                print("BE REMOVED!!!!!!!")
-                print("")
-                yn = self.u.grab("Continue? (y/n):  ")
-                if yn.lower() == "n":
-                    self.main()
-                    return
-                if yn.lower() == "y":
-                    break
-            # Got the OK to erase!  Let's format a diskpart script!
-            self.diskpart_erase(selected_disk, use_gpt, clover_version, local_file=local_file)
-        self.main()
+        
+import random
 
-if __name__ == '__main__':
-    w = WinUSB()
-    w.main()
+quotes = [
+    "Stay hungry, stay foolish.",
+    "Code is like humor – when you have to explain it, it’s bad.",
+    "Experience is the name everyone gives to their mistakes.",
+    "First, solve the problem. Then, write the code."
+]
+
+print("💡 Random Quote:", random.choice(quotes))
