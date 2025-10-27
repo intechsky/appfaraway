@@ -1,4 +1,4 @@
-from Scripts import utils, diskwin, downloader, run
+    from Scripts import utils, diskwin, downloader, run
 import os, sys, tempfile, shutil, zipfile, platform, json, time
 
 class WinUSB:
@@ -276,166 +276,62 @@ while True:
         print("Verifying OS name...")
         if not os.name=="nt":
             print("")
-            print("This script is only for Windows!")
-            print("")
-            self.u.grab("Press [enter] to exit...")
-            exit(1)
-        print(" - Name = NT")
-        print("Verifying OS version...")
-        # Verify we're at version 9600 or greater
-        try:
-            # Set plat to the last item of the output split by . - looks like:
-            # Windows-8.1-6.3.9600
-            # or this:
-            # Windows-10-10.0.17134-SP0
-            plat = int(platform.platform().split(".")[-1].split("-")[0])
-        except:
-            plat = 0
-        if plat < self.min_plat:
-            print("")
-            print("Currently running {}, this script requires version {} or newer.".format(platform.platform(), self.min_plat))
-            print("")
-            self.u.grab("Press [enter] to exit...")
-            exit(1)
-        print(" - Version = {}".format(plat))
-        print("")
-        print("{} >= {}, continuing...".format(plat, self.min_plat))
 
-    def diskpart_flag(self, disk, as_efi=False):
-        # Sets and unsets the GUID needed for a GPT EFI partition ID
-        self.u.head("Changing ID With DiskPart")
-        print("")
-        print("Setting type as {}...".format("EFI" if as_efi else "Basic Data"))
-        print("")
-        # - EFI system partition: c12a7328-f81f-11d2-ba4b-00a0c93ec93b
-        # - Basic data partition: ebd0a0a2-b9e5-4433-87c0-68b6b72699c7
-        dp_script = "\n".join([
-            "select disk {}".format(disk.get("index",-1)),
-            "sel part 1",
-            "set id={}".format(self.efi_id if as_efi else self.bas_id)
-        ])
-        temp = tempfile.mkdtemp()
-        script = os.path.join(temp, "diskpart.txt")
-        try:
-            with open(script,"w") as f:
-                f.write(dp_script)
-        except:
-            shutil.rmtree(temp)
-            print("Error creating script!")
-            print("")
-            self.u.grab("Press [enter] to return...")
-            return
-        # Let's try to run it!
-        out = self.r.run({"args":[self.diskpart,"/s",script],"stream":True})
-        # Ditch our script regardless of whether diskpart worked or not
-        shutil.rmtree(temp)
-        print("")
-        if out[2] != 0:
-            # Error city!
-            print("DiskPart exited with non-zero status ({}).  Aborting.".format(out[2]))
+            import random
+import json
+
+FILE = "scores.json"
+
+def load_scores():
+    try:
+        with open(FILE, "r") as f:
+            return json.load(f)
+    except FileNotFoundError:
+        return {}
+
+def save_scores(scores):
+    with open(FILE, "w") as f:
+        json.dump(scores, f, indent=4)
+
+def play_game():
+    number = random.randint(1, 100)
+    attempts = 0
+
+    print("\n🎯 Welcome to the Number Guessing Game!")
+    print("I'm thinking of a number between 1 and 100.")
+
+    while True:
+        guess = input("Enter your guess: ")
+        if not guess.isdigit():
+            print("Please enter a valid number.")
+            continue
+        guess = int(guess)
+        attempts += 1
+
+        if guess < number:
+            print("Too low!")
+        elif guess > number:
+            print("Too high!")
         else:
-            print("Done - You may need to replug your drive for the")
-            print("changes to take effect.")
-        print("")
-        self.u.grab("Press [enter] to return...")
+            print(f"🎉 Correct! You guessed it in {attempts} tries.\n")
+            return attempts
 
-    def diskpart_erase(self, disk, gpt=False, clover_version = None, local_file = None):
-        # Generate a script that we can pipe to diskpart to erase our disk
-        self.u.head("Erasing With DiskPart")
-        print("")
-        # Then we'll re-gather our disk info on success and move forward
-        # Using MBR to effectively set the individual partition types
-        # Keeps us from having issues mounting the EFI on Windows -
-        # and also lets us explicitly set the partition id for the main
-        # data partition.
-        if not gpt:
-            print("Using MBR...")
-            dp_script = "\n".join([
-                "select disk {}".format(disk.get("index",-1)),
-                "clean",
-                "convert mbr",
-                "create partition primary size=200",
-                "format quick fs=fat32 label='BOOT'",
-                "active",
-                "create partition primary",
-                "select part 2",
-                "set id=AB", # AF = HFS, AB = Recovery
-                "select part 1",
-                "assign"
-            ])
-        else:
-            print("Using GPT...")
-            dp_script = "\n".join([
-                "select disk {}".format(disk.get("index",-1)),
-                "clean",
-                "convert gpt",
-                "create partition primary size=200",
-                "format quick fs=fat32 label='BOOT'",
-                "create partition primary id={}".format(self.hfs_id)
-            ])
-        temp = tempfile.mkdtemp()
-        script = os.path.join(temp, "diskpart.txt")
-        try:
-            with open(script,"w") as f:
-                f.write(dp_script)
-        except:
-            shutil.rmtree(temp)
-            print("Error creating script!")
-            print("")
-            self.u.grab("Press [enter] to return...")
-            return
-        # Let's try to run it!
-        out = self.r.run({"args":[self.diskpart,"/s",script],"stream":True})
-        # Ditch our script regardless of whether diskpart worked or not
-        shutil.rmtree(temp)
-        if out[2] != 0:
-            # Error city!
-            print("")
-            print("DiskPart exited with non-zero status ({}).  Aborting.".format(out[2]))
-            print("")
-            self.u.grab("Press [enter] to return...")
-            return
-        # We should now have a fresh drive to work with
-        # Let's write an image or something
-        self.u.head("Updating Disk Information")
-        print("")
-        print("Re-populating list...")
-        self.d.update()
-        print("Relocating disk {}".format(disk["index"]))
-        disk = self.d.disks[str(disk["index"])]
-        self.select_package(disk, clover_version, local_file=local_file)
+def main():
+    name = input("Enter your name: ")
+    scores = load_scores()
 
-    def select_package(self, disk, clover_version = None, local_file = None):
-        self.u.head("Select Recovery Package")
-        print("")
-        print("{}. {} - {} ({})".format(
-            disk.get("index",-1), 
-            disk.get("model","Unknown"), 
-            self.dl.get_size(disk.get("size",-1),strip_zeroes=True),
-            ["Unknown","No Root Dir","Removable","Local","Network","Disc","RAM Disk"][disk.get("type",0)]
-            ))
-        print("")
-        print("M. Main Menu")
-        print("Q. Quit")
-        print("")
-        print("(To copy a file's path, shift + right-click in Explorer and select 'Copy as path')\n")
-        menu = self.u.grab("Please paste the recovery update pkg/dmg path to extract:  ")
-        if menu.lower() == "q":
-            self.u.custom_quit()
-        if menu.lower() == "m":
-            return
-        path = self.u.check_path(menu)
-        if not path:
-            self.select_package(disk, clover_version, local_file=local_file)
-            return
-        # Got the package - let's make sure it's named right - just in case
-        if os.path.basename(path).lower().endswith(".hfs"):
-            # We have an hfs image already - bypass extraction
-            self.dd_image(disk, path, clover_version, local_file=local_file)
-            return
-        # If it's a directory, find the first recovery hit
-        if os.path.isdir(path):
-            for f in os.listdir(path):
+    attempts = play_game()
+
+    if name not in scores or attempts < scores[name]:
+        scores[name] = attempts
+        save_scores(scores)
+        print(f"🏆 New personal best, {name}! Saved your score.\n")
+    else:
+        print(f"Your best record is {scores[name]} tries.\n")
+
+if __name__ == "__main__":
+    main()
+
                 if f.lower().endswith(self.recovery_suffixes):
                     path = os.path.join(path, f)
                     break
