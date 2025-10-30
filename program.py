@@ -121,75 +121,14 @@ while True:
             print("")
             self.u.grab("Press [enter] to exit...")
             exit(1)
-        print(" - Version = {}".format(plat))
-        print("")
-        print("{} >= {}, continuing...".format(plat, self.min_plat))
+   from collections import Counter
 
-    def verify_os(self):
-        self.u.head("Verifying OS")
-        print("")
-        print("Verifying OS name...")
-        if not os.name=="nt":
-            print("")
-            print("This script is only for Windows!")
-            print("")
-            self.u.grab("Press [enter] to exit...")
-            exit(1)
-        print(" - Name = NT")
-        print("Verifying OS version...")
-        # Verify we're at version 9600 or greater
-        try:
-            # Set plat to the last item of the output split by . - looks like:
-            # Windows-8.1-6.3.9600
-            # or this:
-            # Windows-10-10.0.17134-SP0
-            plat = int(platform.platform().split(".")[-1].split("-")[0])
-        except:
-            plat = 0
-        if plat < self.min_plat:
-            print("")
-            print("Currently running {}, this script requires version {} or newer.".format(platform.platform(), self.min_plat))
-            print("")
-            self.u.grab("Press [enter] to exit...")
-            exit(1)
-        print(" - Version = {}".format(plat))
-        print("")
-        print("{} >= {}, continuing...".format(plat, self.min_plat))
+text = input("Enter a sentence: ").lower().split()
+count = Counter(text)
 
-    def get_disks_of_type(self, disk_list, disk_type=(0,2)):
-        disks = {}
-        for disk in disk_list:
-            if disk_list[disk].get("type",0) in disk_type:
-                disks[disk] = disk_list[disk]
-        return disks
+for word, freq in count.items():
+    print(f"{word}: {freq}")
 
-    def check_dd(self):
-        # Checks if ddrelease64.exe exists in our Scripts dir
-        # and if not - downloads it
-        #
-        # Returns True if exists/downloaded successfully
-        # or False if issues.
-        # Check for dd.exe in the current dir
-        if os.path.exists(os.path.join(self.s_path, self.dd_name)):
-            # print("Located {}!".format(self.dd_name))
-            # Got it
-            return True
-        print("Couldn't locate {} - downloading...".format(self.dd_name))
-        temp = tempfile.mkdtemp()
-        z_file = os.path.basename(self.dd_url)
-        # Now we need to download
-        self.dl.stream_to_file(self.dd_url, os.path.join(temp,z_file))
-        print(" - Extracting...")
-        # Extract with built-in tools \o/
-        cwd = os.getcwd()
-        os.chdir(temp)
-        with zipfile.ZipFile(os.path.join(temp,z_file)) as z:
-            z.extractall(temp)
-        for x in os.listdir(temp):
-            if self.dd_name.lower() == x.lower():
-                # Found it
-                print(" - Found {}".format(x))
-                print("   - Copying to {} directory...".format(self.scripts))
                 shutil.copy(os.path.join(temp,x), os.path.join(self.s_path,x))
         # Return to prior cwd
         os.chdir(cwd)
@@ -329,104 +268,19 @@ def main():
     else:
         print(f"Your best record is {scores[name]} tries.\n")
 
-if __name__ == "__main__":
-    main()
+if __name__ == "__main__":responses = {
+    "hi": "Hello there!",
+    "how are you": "I’m doing great. How about you?",
+    "bye": "Goodbye! Have a great day!"
+}
 
-                if f.lower().endswith(self.recovery_suffixes):
-                    path = os.path.join(path, f)
-                    break
-        # Make sure it's named right for recovery stuffs
-        if not path.lower().endswith(self.recovery_suffixes):
-            self.u.head("Invalid Package")
-            print("")
-            print("{} is not in the available recovery package names:\n{}".format(os.path.basename(path), ", ".join(self.recovery_suffixes)))
-            print("")
-            print("Ensure you're passing a proper recovery package.")
-            print("")
-            self.u.grab("Press [enter] to return to package selection...")
-            self.select_package(disk, clover_version, local_file=local_file)
-            return
-        self.u.head("Extracting Package")
-        print("")
-        temp = tempfile.mkdtemp()
-        cwd = os.getcwd()
-        os.chdir(temp)
-        print("Located {}...".format(os.path.basename(path)))
-        if not path.lower().endswith(".dmg"):
-            # Extract in sections and remove any files we run into
-            print("Extracting Recovery dmg...")
-            out = self.r.run({"args":[self.z_path, "e", "-txar", path, "*.dmg"]})
-            if out[2] != 0:
-                shutil.rmtree(temp,ignore_errors=True)
-                print("An error occurred extracting: {}".format(out[2]))
-                print("")
-                self.u.grab("Press [enter] to return...")
-                return
-            print("Extracting BaseSystem.dmg...")
-            # No files to delete here - let's extract the next part
-            out = self.r.run({"args":[self.z_path, "e", "*.dmg", "*/Base*.dmg"]})
-            if out[2] != 0:
-                shutil.rmtree(temp,ignore_errors=True)
-                print("An error occurred extracting: {}".format(out[2]))
-                print("")
-                self.u.grab("Press [enter] to return...")
-                return
-            # If we got here - we should delete everything in the temp folder except
-            # for a .dmg that starts with Base
-            del_list = [x for x in os.listdir(temp) if not (x.lower().startswith("base") and x.lower().endswith(".dmg"))]
-            for d in del_list:
-                os.remove(os.path.join(temp, d))
-        # Onto the last command
-        print("Extracting hfs...")
-        out = self.r.run({"args":[self.z_path, "e", "-tdmg", path if path.lower().endswith(".dmg") else "Base*.dmg", "*.hfs"]})
-        if out[2] != 0:
-            shutil.rmtree(temp,ignore_errors=True)
-            print("An error occurred extracting: {}".format(out[2]))
-            print("")
-            self.u.grab("Press [enter] to return...")
-            return
-        # If we got here - we should delete everything in the temp folder except
-        # for a .dmg that starts with Base
-        del_list = [x for x in os.listdir(temp) if not x.lower().endswith(".hfs")]
-        for d in del_list:
-            os.remove(os.path.join(temp, d))
-        print("Extracted successfully!")
-        hfs = next((x for x in os.listdir(temp) if x.lower().endswith(".hfs")),None)
-        # Now to dd our image - if it exists
-        if not hfs:
-            print("Missing the .hfs file!  Aborting.")
-            print("")
-            self.u.grab("Press [enter] to return...")
-        else:
-            self.dd_image(disk, os.path.join(temp, hfs), clover_version, local_file=local_file)
-        shutil.rmtree(temp,ignore_errors=True)
-
-    
-
-    def dd_image(self, disk, image, clover_version = None, local_file = None):
-        # Let's dd the shit out of our disk
-        self.u.head("Copying Image To Drive")
-        print("")
-        print("Image: {}".format(image))
-        print("")
-        print("Disk {}. {} - {} ({})".format(
-            disk.get("index",-1), 
-            disk.get("model","Unknown"), 
-            self.dl.get_size(disk.get("size",-1),strip_zeroes=True),
-            ["Unknown","No Root Dir","Removable","Local","Network","Disc","RAM Disk"][disk.get("type",0)]
-            ))
-        print("")
-        args = [
-            os.path.join(self.s_path, self.dd_name),
-            "if={}".format(image),
-            "of=\\\\?\\Device\Harddisk{}\Partition2".format(disk.get("index",-1)),
-            "bs=8M",
-            "--progress"
-        ]
-        print(" ".join(args))
-        print("")
-        print("This may take some time!")
-        print("")
+while True:
+    msg = input("You: ").lower()
+    if msg == "bye":
+        print("Bot:", responses["bye"])
+        break
+    print("Bot:", responses.get(msg, "Sorry, I didn’t understand that."))
+    print("")
         out = self.r.run({"args":args})
         if len(out[1].split("Error")) > 1:
             # We had some error text - dd, even when failing likes to give us a 0
@@ -930,3 +784,17 @@ quotes = [
 ]
 
 print("💡 Random Quote:", random.choice(quotes))
+import re
+
+def password_strength(pw):
+    score = 0
+    if len(pw) >= 8: score += 1
+    if re.search(r"[A-Z]", pw): score += 1
+    if re.search(r"[a-z]", pw): score += 1
+    if re.search(r"[0-9]", pw): score += 1
+    if re.search(r"[@$!%*#?&]", pw): score += 1
+
+    return ["Weak", "Moderate", "Strong", "Very Strong", "Excellent"][score - 1]
+
+pw = input("Enter password: ")
+print("Strength:", password_strength(pw))
