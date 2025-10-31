@@ -774,25 +774,10 @@ while True:
                     continue
                 # Got a valid path that ends with the proper extension
         
-import random
+name = "Alice"
+age = 25
+print(f"My name is {name} and I am {age} years old.")
 
-quotes = [
-    "Stay hungry, stay foolish.",
-    "Code is like humor – when you have to explain it, it’s bad.",
-    "Experience is the name everyone gives to their mistakes.",
-    "First, solve the problem. Then, write the code."
-]
-
-print("💡 Random Quote:", random.choice(quotes))
-import re
-
-def password_strength(pw):
-    score = 0
-    if len(pw) >= 8: score += 1
-    if re.search(r"[A-Z]", pw): score += 1
-    if re.search(r"[a-z]", pw): score += 1
-    if re.search(r"[0-9]", pw): score += 1
-    if re.search(r"[@$!%*#?&]", pw): score += 1
 
     return ["Weak", "Moderate", "Strong", "Very Strong", "Excellent"][score - 1]
 
