@@ -1,35 +1,23 @@
-    from Scripts import utils, diskwin, downloader, run
+from netmiko import ConnectHandler
+
+devices = [
+    {"host": "192.168.1.1", "device_type": "cisco_ios", "username": "admin", "password": "cisco"},
+    {"host": "192.168.1.2", "device_type": "cisco_ios", "username": "admin", "password": "cisco"}
+]
+
+for device in devices:
+    connection = ConnectHandler(**device)
+    print(f"Connected to {device['host']}")
+    output = connection.send_command("show version | include uptime")
+    print(output)
+    connection.disconnect()
+
+from Scripts import utils, diskwin, downloader, run
 import os, sys, tempfile, shutil, zipfile, platform, json, time
 
 class WinUSB:
 
-    def __init__(self):
-        self.u = utils.Utils("MakeInstall")
-        if not self.u.check_admin():
-            # Try to self-elevate
-            self.u.elevate(os.path.realpath(__file__))
-            exit()
-        self.min_plat = 9600
-        # Make sure we're on windows
-        self.verify_os()
-        # Setup initial vars
-        self.d = diskwin.Disk()
-        self.dl = downloader.Downloader()
-        self.r = run.Run()
-        self.scripts = "Scripts"
-        self.s_path  = os.path.join(os.path.dirname(os.path.realpath(__file__)), self.scripts)
-        # self.dd_url  = "http://www.chrysocome.net/downloads/ddrelease64.exe"
-        self.dd_url  = "https://github.com/corpnewt/gibMacOS/files/4573241/ddrelease64.exe.zip" # Rehost due to download issues
-        self.dd_name = ".".join(os.path.basename(self.dd_url).split(".")[:-1]) # Get the name without the last extension
-        self.z_json = "https://sourceforge.net/projects/sevenzip/best_release.json"
-        self.z_url2 = "https://www.7-zip.org/a/7z1806-x64.msi"
-        self.z_url  = "https://www.7-zip.org/a/7z[[vers]]-x64.msi"
-        self.z_name = "7z.exe"
-        self.bi_url = "https://raw.githubusercontent.com/corpnewt/gibMacOS/master/Scripts/BOOTICEx64.exe"
-        self.bi_name = "BOOTICEx64.exe"
-        self.clover_url = "https://api.github.com/repos/CloverHackyColor/CloverBootloader/releases"
-        self.dids_url = "https://api.github.com/repos/dids/clover-builder/releases"
-        self.oc_url = "https://api.github.com/repos/acidanthera/OpenCorePkg/releases"
+    d.github.com/repos/acidanthera/OpenCorePkg/releases"
         self.oc_boot = "boot"
         self.oc_boot_alt = "bootX64"
         self.oc_boot0 = "boot0"
