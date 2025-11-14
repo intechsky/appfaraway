@@ -1,43 +1,49 @@
-from netmiko import ConnectHandler
+library = {}
 
-devices = [
-    {"host": "192.168.1.1", "device_type": "cisco_ios", "username": "admin", "password": "cisco"},
-    {"host": "192.168.1.2", "device_type": "cisco_ios", "username": "admin", "password": "cisco"}
-]
+def add_book(title, author):
+    if title in library:
+        print("Book already exists.")
+    else:
+        library[title] = {"author": author, "borrowed": False}
+        print(f"Added '{title}' by {author}.")
 
-for device in devices:
-    connection = ConnectHandler(**device)
-    print(f"Connected to {device['host']}")
-    output = connection.send_command("show version | include uptime")
-    print(output)
-    connection.disconnect()
+def borrow_book(title):
+    if title in library and not library[title]["borrowed"]:
+        library[title]["borrowed"] = True
+        print(f"You borrowed '{title}'.")
+    else:
+        print("Book unavailable.")
 
-from Scripts import utils, diskwin, downloader, run
-import os, sys, tempfile, shutil, zipfile, platform, json, time
+def return_book(title):
+    if title in library and library[title]["borrowed"]:
+        library[title]["borrowed"] = False
+        print(f"You returned '{title}'.")
+    else:
+        print("Book not borrowed or doesn't exist.")
 
-class WinUSB:
+def list_books():
+    print("\n--- Library Books ---")
+    for title, info in library.items():
+        status = "Borrowed" if info["borrowed"] else "Available"
+        print(f"{title} by {info['author']} — {status}")
+    print()
 
-    d.github.com/repos/acidanthera/OpenCorePkg/releases"
-        self.oc_boot = "boot"
-        self.oc_boot_alt = "bootX64"
-        self.oc_boot0 = "boot0"
-        self.oc_boot1 = "boot1f32"
-        # self.oc_boot_url = "https://github.com/acidanthera/OpenCorePkg/raw/master/Utilities/LegacyBoot/"
-        self.oc_boot_url = "https://github.com/acidanthera/OpenCorePkg/raw/870017d0e5d53abeaf0347997da912c3e382a04a/Utilities/LegacyBoot/"
-        self.diskpart = os.path.join(os.environ['SYSTEMDRIVE'] + "\\", "Windows", "System32", "diskpart.exe")
-        # From Tim Sutton's brigadier:  https://github.com/timsutton/brigadier/blob/master/brigadier
-        self.z_path = None
-        self.z_path64 = os.path.join(os.environ['SYSTEMDRIVE'] + "\\", "Program Files", "7-Zip", "7z.exe")
-        self.z_path32 = os.path.join(os.environ['SYSTEMDRIVE'] + "\\", "Program Files (x86)", "7-Zip", "7z.exe")
-        self.recovery_suffixes = (
-            "recoveryhdupdate.pkg",
-            "recoveryhdmetadmg.pkg",
-            "basesystem.dmg",
-            "recoveryimage.dmg"
-        import random
+while True:
+    print("\n1. Add Book\n2. Borrow Book\n3. Return Book\n4. List Books\n5. Exit")
+    choice = input("Enter choice: ")
 
-number = random.randint(1, 50)
-attempts = 0
+    if choice == "1":
+        add_book(input("Title: "), input("Author: "))
+    elif choice == "2":
+        borrow_book(input("Title: "))
+    elif choice == "3":
+        return_book(input("Title: "))
+    elif choice == "4":
+        list_books()
+    elif choice == "5":
+        break
+    else:
+        print("Invalid choice.")
 
 while True:
     guess = int(input("Guess a number between 1 and 50: "))
