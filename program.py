@@ -1,3 +1,28 @@
+from netmiko import ConnectHandler
+
+cisco = {
+    "device_type": "cisco_ios",
+    "host": "10.10.10.1",
+    "username": "admin",
+    "password": "password",
+}
+
+conn = ConnectHandler(**cisco)
+conn.enable()
+
+commands = [
+    "interface GigabitEthernet0/1",
+    "description Connected to Server",
+    "ip address 192.168.10.1 255.255.255.0",
+    "no shutdown"
+]
+
+output = conn.send_config_set(commands)
+print(output)
+
+conn.save_config()
+conn.disconnect()
+
 library = {}
 
 def add_book(title, author):
