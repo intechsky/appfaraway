@@ -21,7 +21,7 @@
 
 <body>
 
-  <h1 id="title">Welcome 👋</h1>
+  <h1 id="title">Welcome home 👋</h1>
   <p>Click buttons to see JS in action</p>
 
   <button onclick="changeColor()">Change Background</button>
