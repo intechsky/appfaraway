@@ -6,8 +6,7 @@
     body {
       font-family: Arial;
       text-align: center;
-      padding-top: 80px;
-      transition: 0.3s;
+    
     }
 
     button {
